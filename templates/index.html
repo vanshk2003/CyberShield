@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberShield – Security Toolkit</title>
+<style>
+  :root{--bg:#0b1220;--card:#121b2e;--line:#22304d;--text:#e6edf7;--muted:#8fa3c4;
+        --accent:#22d3ee;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:22px 32px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px}
+  header h1{margin:0;font-size:24px} header h1 span{color:var(--accent)}
+  header p{margin:0;color:var(--muted);font-size:14px}
+  nav{display:flex;gap:8px;padding:16px 32px;flex-wrap:wrap}
+  nav button{background:var(--card);color:var(--text);border:1px solid var(--line);padding:10px 18px;
+             border-radius:8px;cursor:pointer;font-size:15px}
+  nav button.active{border-color:var(--accent);color:var(--accent)}
+  main{padding:0 32px 40px;max-width:1000px}
+  .panel{display:none}.panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:18px}
+  h2{margin-top:0} .muted{color:var(--muted);font-size:14px}
+  input[type=text],input[type=password]{width:100%;padding:12px;border-radius:8px;border:1px solid var(--line);
+             background:#0a1120;color:var(--text);font-size:16px;font-family:Consolas,monospace}
+  .row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  .btn{background:var(--accent);color:#04131a;border:0;padding:11px 20px;border-radius:8px;
+       font-weight:600;cursor:pointer;font-size:15px}
+  .btn.alt{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .bar{height:12px;background:#0a1120;border-radius:6px;overflow:hidden;margin:14px 0 6px}
+  .bar div{height:100%;width:0;transition:width .4s}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+  .stat{background:#0a1120;border:1px solid var(--line);border-radius:8px;padding:12px}
+  .stat b{display:block;font-size:20px;margin-top:4px}
+  ul{padding-left:20px} li{margin:5px 0}
+  code,.mono{font-family:Consolas,monospace;font-size:13px;word-break:break-all;color:#a5f3fc}
+  table{width:100%;border-collapse:collapse;font-size:14px} td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+  .verdict{font-size:22px;font-weight:700;padding:12px 16px;border-radius:8px;display:inline-block}
+  .chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:13px;margin:3px;background:#0a1120;border:1px solid var(--line)}
+  .chip.y{border-color:var(--ok);color:var(--ok)}.chip.n{border-color:var(--bad);color:var(--bad)}
+  .samples button{background:none;border:1px dashed var(--line);color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer;margin:3px;font-family:Consolas,monospace;font-size:12px}
+  .err{color:var(--bad)}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:34px">🛡️</div>
+  <div><h1>Cyber<span>Shield</span></h1><p>Mini Security Toolkit · M.Tech Cybersecurity</p></div>
+</header>
+
+<nav>
+  <button class="active" data-tab="pw">🔑 Password Analyzer</button>
+  <button data-tab="url">🎣 Phishing URL Detector</button>
+  <button data-tab="enc">🔒 File Encryption & Integrity</button>
+</nav>
+
+<main>
+<!-- ================= MODULE 1 ================= -->
+<section class="panel active" id="pw">
+  <div class="card">
+    <h2>Password Strength Analyzer</h2>
+    <p class="muted">Calculates entropy, checks against leaked-password lists and patterns, estimates offline crack time, and shows secure vs insecure hashing.</p>
+    <input type="password" id="pwIn" placeholder="Type a password…" autocomplete="off">
+    <div class="row"><label class="muted"><input type="checkbox" onclick="pwIn.type=this.checked?'text':'password'"> Show</label>
+      <span class="samples muted">Try: <button onclick="setPw('password123')">password123</button><button onclick="setPw('Qwerty@2024')">Qwerty@2024</button><button onclick="setPw('T7#kp!Lz9$wQ2&mV')">T7#kp!Lz9$wQ2&mV</button></span></div>
+    <div id="pwOut"></div>
+  </div>
+</section>
+
+<!-- ================= MODULE 2 ================= -->
+<section class="panel" id="url">
+  <div class="card">
+    <h2>Phishing URL Detector</h2>
+    <p class="muted">Rule-based engine with 13 heuristics: IP-based URLs, typosquatting (Levenshtein distance), brand impersonation, homograph/punycode, suspicious TLDs, and more.</p>
+    <input type="text" id="urlIn" placeholder="https://example.com/login">
+    <div class="row"><button class="btn" onclick="checkUrl()">Scan URL</button></div>
+    <div class="samples muted" style="margin-top:10px">Samples:
+      <button onclick="setUrl('https://www.google.com')">google.com</button>
+      <button onclick="setUrl('http://paypa1.com/login/verify-account')">paypa1.com</button>
+      <button onclick="setUrl('http://192.168.10.5/sbi/kyc-update.php')">IP + KYC</button>
+      <button onclick="setUrl('http://secure-login.amazon.account-verify.xyz/signin?user=you')">amazon .xyz</button>
+      <button onclick="setUrl('https://www.google.com@evil-site.tk/free-bonus')">@ trick</button>
+    </div>
+    <div id="urlOut"></div>
+  </div>
+</section>
+
+<!-- ================= MODULE 3 ================= -->
+<section class="panel" id="enc">
+  <div class="card">
+    <h2>File Encryption (AES-256-GCM)</h2>
+    <p class="muted">Password → PBKDF2-SHA256 (200,000 iterations + random salt) → 256-bit key → AES-GCM authenticated encryption. Wrong password or a single modified byte is detected.</p>
+    <input type="file" id="encFile">
+    <div style="margin-top:10px"><input type="password" id="encPw" placeholder="Encryption password"></div>
+    <div class="row"><button class="btn" onclick="crypt('encrypt')">🔒 Encrypt & Download</button>
+      <button class="btn alt" onclick="crypt('decrypt')">🔓 Decrypt (.enc) & Download</button></div>
+    <div id="encOut"></div>
+  </div>
+  <div class="card">
+    <h2>File Integrity Checker</h2>
+    <p class="muted">Generate hashes of a file. Compare with a known/expected hash to verify it hasn't been modified (used for malware detection, downloads verification, digital forensics).</p>
+    <input type="file" id="hashFile">
+    <div style="margin-top:10px"><input type="text" id="expected" placeholder="(Optional) paste expected SHA-256 to verify"></div>
+    <div class="row"><button class="btn" onclick="hashIt()">Compute Hashes</button></div>
+    <div id="hashOut"></div>
+  </div>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button,.panel').forEach(e => e.classList.remove('active'));
+  b.classList.add('active'); $(b.dataset.tab).classList.add('active');
+});
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const colors = ['#ef4444','#f97316','#f59e0b','#22c55e','#16a34a'];
+
+/* ---------- Module 1 ---------- */
+let t;
+$('pwIn').addEventListener('input', () => { clearTimeout(t); t = setTimeout(checkPw, 250); });
+function setPw(v){ $('pwIn').value = v; checkPw(); }
+async function checkPw(){
+  const pw = $('pwIn').value;
+  if(!pw){ $('pwOut').innerHTML=''; return; }
+  const r = await (await fetch('/api/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})).json();
+  const c = colors[r.score];
+  $('pwOut').innerHTML = `
+    <div class="bar"><div style="width:${(r.score+1)*20}%;background:${c}"></div></div>
+    <b style="color:${c};font-size:20px">${r.strength}</b>
+    <div class="stats">
+      <div class="stat muted">Length<b>${r.length}</b></div>
+      <div class="stat muted">Character pool<b>${r.charset_size}</b></div>
+      <div class="stat muted">Entropy<b>${r.entropy_bits} bits</b></div>
+      <div class="stat muted">Est. crack time (10B guesses/s)<b>${esc(r.crack_time)}</b></div>
+    </div>
+    <div>${Object.entries(r.checks).map(([k,v])=>`<span class="chip ${v?'y':'n'}">${v?'✔':'✘'} ${k}</span>`).join('')}</div>
+    <h3>Recommendations</h3><ul>${r.feedback.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+    <h3>How this password would be stored</h3>
+    <table>
+      <tr><th>Method</th><th>Hash</th></tr>
+      <tr><td>❌ MD5 (broken, fast)</td><td class="mono">${r.hashes.md5_insecure}</td></tr>
+      <tr><td>⚠️ SHA-256, no salt (rainbow-table risk)</td><td class="mono">${r.hashes.sha256_unsalted}</td></tr>
+      <tr><td>✅ PBKDF2-SHA256, 200k iter<br><span class="muted">salt: <code>${r.hashes.pbkdf2_salt}</code></span></td><td class="mono">${r.hashes.pbkdf2_sha256_200k}</td></tr>
+    </table>
+    <p class="muted">Re-type the same password: the PBKDF2 hash changes every time (random salt) – the MD5/SHA-256 ones don't.</p>`;
+}
+
+/* ---------- Module 2 ---------- */
+function setUrl(v){ $('urlIn').value = v; checkUrl(); }
+$('urlIn').addEventListener('keydown', e => { if(e.key==='Enter') checkUrl(); });
+async function checkUrl(){
+  const res = await fetch('/api/url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:$('urlIn').value})});
+  const r = await res.json();
+  if(r.error){ $('urlOut').innerHTML = `<p class="err">${esc(r.error)}</p>`; return; }
+  const c = r.risk_score>=50?'#ef4444':r.risk_score>=25?'#f59e0b':'#22c55e';
+  $('urlOut').innerHTML = `
+    <div style="margin-top:18px">
+      <span class="verdict" style="background:${c}22;color:${c};border:1px solid ${c}">${r.verdict}</span></div>
+    <div class="bar"><div style="width:${r.risk_score}%;background:${c}"></div></div>
+    <p>Risk score: <b>${r.risk_score}/100</b> &nbsp;·&nbsp; Host: <code>${esc(r.host)}</code></p>
+    ${r.findings.length ? `<table><tr><th>Indicator detected</th><th>Points</th></tr>
+      ${r.findings.map(f=>`<tr><td>${esc(f.rule)}</td><td>+${f.points}</td></tr>`).join('')}</table>`
+      : '<p>No phishing indicators found.</p>'}`;
+}
+
+/* ---------- Module 3 ---------- */
+async function crypt(mode){
+  const f = $('encFile').files[0], pw = $('encPw').value;
+  if(!f || !pw){ $('encOut').innerHTML='<p class="err">Choose a file and enter a password.</p>'; return; }
+  const fd = new FormData(); fd.append('file', f); fd.append('password', pw);
+  $('encOut').innerHTML = '<p class="muted">Working… (key derivation takes a moment)</p>';
+  const res = await fetch('/api/'+mode,{method:'POST',body:fd});
+  if(!res.ok){ const e = await res.json(); $('encOut').innerHTML = `<p class="err">❌ ${esc(e.error)}</p>`; return; }
+  const blob = await res.blob();
+  const name = mode==='encrypt' ? f.name+'.enc' : (f.name.endsWith('.enc') ? f.name.slice(0,-4) : 'decrypted_'+f.name);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  $('encOut').innerHTML = `<p style="color:var(--ok)">✅ ${mode==='encrypt'?'Encrypted':'Decrypted'} successfully → downloaded <code>${esc(name)}</code> (${blob.size} bytes)</p>`;
+}
+async function hashIt(){
+  const f = $('hashFile').files[0];
+  if(!f){ $('hashOut').innerHTML='<p class="err">Choose a file.</p>'; return; }
+  const fd = new FormData(); fd.append('file', f);
+  const r = await (await fetch('/api/hash',{method:'POST',body:fd})).json();
+  const exp = $('expected').value.trim().toLowerCase();
+  let verdict = '';
+  if(exp) verdict = exp===r.sha256
+    ? '<p style="color:var(--ok);font-weight:700">✅ INTEGRITY VERIFIED – file is unmodified</p>'
+    : '<p style="color:var(--bad);font-weight:700">❌ HASH MISMATCH – file has been altered or corrupted!</p>';
+  $('hashOut').innerHTML = `${verdict}<table>
+    <tr><td>Size</td><td>${r.size_bytes} bytes</td></tr>
+    <tr><td>MD5</td><td class="mono">${r.md5}</td></tr>
+    <tr><td>SHA-1</td><td class="mono">${r.sha1}</td></tr>
+    <tr><td>SHA-256</td><td class="mono">${r.sha256}</td></tr></table>`;
+}
+</script>
+</body>
+</html>
